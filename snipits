@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # TODO:
+# - Deficated <insert>
 # - Make sure there is exactly one instance of <CSR> in the output
 # - Indentation. Could generalize to also do comments or -- or ...
 # - General snipits. ie. for all fletypes
@@ -43,12 +44,23 @@ push() {
     else
       cat "$file";
     fi
-  } | sed "$sed_ex"
+  } | sed "$sed_ex" > $tmpf 
+
+  [ -z "$(cat $tmpf)" ] && echo "<CSR>" > $tmpf
+
+  ## Note: This one should prefrably be 0, it is 1, because I don't want to write vim script
+  if [ $INDENT_MULTIPLIER -gt 0 ]; then
+    tst() { printf "$1"'%.s' $(eval "echo {1.."$(($2))"}"); }
+    indent=$(tst "$INDENT" "$INDENT_MULTIPLIER")
+    sed -i "s/^/$indent/" $tmpf
+  fi
+
+  cat $tmpf
+  rm $tmpf
 }
 
 dmenu_browse() {
   dmenu -jd 0 -j <( node_index ) \
-        -fn 'Ubuntu Mono:bold:pixelsize=24' \
         -w "$(get_winId)" 
 
   # ls "$SNIP_FOLDER" \
@@ -73,8 +85,9 @@ main() {
   else 
     choise="$(node_index | jq ".$2" )";
   fi
-
-  [ -z "$choise" ] && exit 0
+    
+  # Note: I'm lasy, this printing is because I'm expecting something in vim
+  [ -z "$choise" ] && { echo "<CSR>"; exit 0; }
   push "$choise" > /dev/stdout
 }
 
@@ -91,12 +104,17 @@ _invopt() {
   echo "Try '$0 --help' for more information"
 }
 
+INDENT=" "
+INDENT_MULTIPLIER=0
+
 # Read arguments
 POSITIONAL=()
 while [[ $# -gt 0 ]]; do
 case $1 in
   -h|--help) _usage; exit 0 ;;
   -e|--embed) EMBEDED_CONTENT=true;;
+  -i|--indent) INDENT="$2"; shift;;
+  -im|--indnt-multiplier) INDENT_MULTIPLIER="$2"; shift;;
   -*) _invopt 1&>2; exit 1 ;;
   *) POSITIONAL+=("$1") ;;
 esac; shift;

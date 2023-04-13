@@ -1,4 +1,8 @@
-package main
+package index
+
+import (
+    "snipits/snipit"
+)
 
 import (
     "encoding/json"
@@ -6,25 +10,8 @@ import (
     "fmt"
     "log"
     "os"
+
 )
-
-// type Snipit struct {
-//     Name  string 
-//     Type  string
-//     Data  
-// }
-
-type Snipit struct {
-    // map[string]string
-    // Name    string
-    File    string
-    Vars    map[string]string
-}
-
-type Node struct {
-    // Name   string
-    Snipits map[string]Snipit
-}
 
 type TemplateEntry struct {
     Key     string
@@ -35,6 +22,11 @@ type TemplateEntry struct {
 type TemplateData struct {
     File    string
     Data    []TemplateEntry
+}
+
+type Node struct {
+    // Name   string
+    Snipits map[string]snipit.Snipit
 }
 
 
@@ -50,7 +42,7 @@ func read_templatefile(node Node, path string, name string) {
   for _, td := range data {
     for _, entry := range td.Data {
       // TODO: check for overvride
-      snipits[entry.Key] = Snipit{
+      snipits[entry.Key] = snipit.Snipit{
           // TODO: _templates not hardcoded
           File: path + "/_templates/" + td.File,
           Vars: entry.Vars,
@@ -74,7 +66,7 @@ func gen_dir(node Node, path string) {
     for _, entry := range lfiles {
       if !entry.IsDir() {
         if entry.Name()[0] != '_' {
-          snipit := Snipit{
+          snipit := snipit.Snipit{
               // Name: entry.Name(),
               File: path + "/" + entry.Name(),
               Vars: make(map[string]string) }
@@ -99,13 +91,13 @@ func gen_dir(node Node, path string) {
     }
 }
 
+func GenIndex(path string) {
+  // if len(os.Args) < 1 { 
+  //   log.Fatal("Not enough args")
+  //   os.Exit(1)
+  // }
+  // path := os.Args[1] 
 
-func main() {
-  if len(os.Args) < 1 { 
-    log.Fatal("Not enough args")
-    os.Exit(1)
-  }
-  path := os.Args[1] 
   os.Chdir(path)
   // path := "./test"
 
@@ -118,7 +110,7 @@ func main() {
   for _, entry := range entries {
     if entry.IsDir() {
       node := Node{
-          Snipits: make(map[string]Snipit),
+          Snipits: make(map[string]snipit.Snipit),
       }
 
       gen_dir(node, entry.Name())

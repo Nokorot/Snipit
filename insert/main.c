@@ -13,8 +13,23 @@ void stream_cpy(FILE *in, FILE *out) {
 
 // TODOO: Write help!!
 
+//
+// {
+//   "replase" : [
+//
+//   ]
+//   
+// }
+//
+//
+//
+
 
 int main(int argc, char **argv) {
+
+  // _insert <temp-file> [--json <json-file>] [--insert <KEY> <arg-file>]
+
+  
 
   FILE *fd_src = fopen(argv[1], "r");
   if (fd_src == NULL) {
